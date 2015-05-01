@@ -103,8 +103,24 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     end
   end
   
-  if status_code >= 500 or
-    (status_code >= 400 and status_code ~= 404 and status_code ~= 403) then
+  if status_code == 400 then
+    io.stdout:write("\nServer returned "..http_stat.statcode..". Sleeping.\n")
+    io.stdout:flush()
+
+    os.execute("sleep 3")
+    
+    tries = tries + 1
+
+    if tries >= 3 then
+      io.stdout:write("\nI give up...\n")
+      io.stdout:flush()
+      tries = 0
+      return wget.actions.EXIT
+    else
+      return wget.actions.CONTINUE
+    end
+  elseif status_code >= 500 or
+    (status_code >= 400 and status_code ~= 404 and status_code ~= 403 and status_code ~= 400) then
 
     io.stdout:write("\nServer returned "..http_stat.statcode..". Sleeping.\n")
     io.stdout:flush()
